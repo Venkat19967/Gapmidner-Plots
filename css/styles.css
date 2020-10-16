@@ -1,0 +1,53 @@
+#wrapper {
+  margin:auto;
+  width:1440px;
+}
+input {
+  width:50px;
+}
+svg {
+  border:1px solid gray;
+  border-radius:10px;
+  height:720px;
+  width:1280px;
+  margin:5px;
+}
+#linechart {
+  width:800px;
+}
+
+html {
+  font-family: 'Trebuchet MS', sans-serif;
+}
+
+
+h2, h3 {
+  text-align:center;
+}
+
+
+
+.playbutton {
+  border: 0;
+  line-height: 1.5;
+  text-align: center;
+  color: #fff;
+  text-shadow: 1px 1px 1px #000;
+  border-radius: 10px;
+  background-color: rgba(220, 0, 0, 1);
+  background-image: linear-gradient(to top left,
+                                    rgba(0, 0, 0, .2),
+                                    rgba(0, 0, 0, .2) 30%,
+                                    rgba(0, 0, 0, 0));
+  box-shadow: inset 2px 2px 3px rgba(255, 255, 255, .6),
+              inset -2px -2px 3px rgba(0, 0, 0, .6);
+}
+
+.playbutton:hover {
+  background-color: rgba(255, 0, 0, 1);
+}
+
+.playbutton:active {
+  box-shadow: inset -2px -2px 3px rgba(255, 255, 255, .6),
+              inset 2px 2px 3px rgba(0, 0, 0, .6);
+}
