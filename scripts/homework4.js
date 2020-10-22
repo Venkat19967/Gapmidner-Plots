@@ -26,8 +26,9 @@ var y;
 var colorScale;
 
 var interval = null;
-// var intervalDuration = 100;
 var playBtn;
+
+var tempd;
 
 
 // This runs when the page is loaded
@@ -190,6 +191,8 @@ function plotaxes(){
 
 function scatterplot(){
 
+
+   
     d3.selectAll("#yrimage").remove();
 
     if(reg == 'All'){
@@ -208,6 +211,12 @@ function scatterplot(){
     // jsonVal_region.forEach(function(d){
     //     d['yr'] = String(yrinput);
     // })
+
+    
+  
+
+
+
 
     svg.append("text")
     .attr('id','yrimage')
@@ -234,13 +243,11 @@ function scatterplot(){
 }
 
 function enterplots(enter, t) {
-    // console.log(enter)
+    
     enter.append('g').attr('id','plotpoints')
       .call(
           g => g
           .on('mouseover', function(d,i) {
-            // d3.select(this).transition()
-            //   .attr('class', 'countrymap_hover');
             div.transition()
               .duration(50)
               .style("opacity", 1);
@@ -249,18 +256,19 @@ function enterplots(enter, t) {
             .style("top", (d3.event.pageY) + 10 + "px");
           })
           .on('mousemove',function(d,i) {
-            // console.log('mousemove on ' + d.properties.name);
             div.html(`Country: ${d.country}`)
             .style("left", (d3.event.pageX) + 10 + "px")
             .style("top", (d3.event.pageY) + 10 + "px");
           })
           .on('mouseout', function(d,i) {
-            // console.log('mouseout on ' + d.properties.name);
-            // d3.select(this).transition()
-            //          .attr('class', 'countrymap');
             div.transition()
                      .duration(50)
                      .style("opacity", 0);
+          })
+          .on('click', function(d,i) {
+            Country = d.country;
+            drawLineChart(Country);
+            // console.log('clicked on ' + d.properties.name);
           })
           .append('circle')
           .transition(t)
@@ -381,4 +389,32 @@ function enterplots(enter, t) {
         .style('opacity', 0)
         .remove()
     )
+  }
+
+
+  function drawLineChart(country){
+    onsole.log("Inside Draw Linechart");
+    tempd = jsonVal_region.filter(function(d){
+        return d.country == country;
+    })
+    console.log(tempd);
+    svg.append("path")
+    .datum(tempd)
+    .attr("fill", "none")
+    .attr("stroke", "black")
+    .attr("stroke-width", 2)
+    .attr("transform", "translate("+ 125 + "," + 50 +")")
+    .attr("d", d3.line()
+      .x(function(d) { 
+          console.log(d);
+            return x(parseInt(d[xattr][yrinput-1800]));
+        
+    })
+      .y(function(d) { 
+        console.log(d);
+            return y(parseInt(d[yattr][yrinput-1800]));
+        
+    })
+      );
+      
   }
