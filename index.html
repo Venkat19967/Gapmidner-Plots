@@ -15,7 +15,7 @@
       <hr style='width:100%'>
       <h2>Scatterplot</h2>
       &nbsp;X attribute:&nbsp;
-      <select id='x-attribute' onchange="getfields()">
+      <select id='x-attribute' onchange="getfields(); plotaxes(); scatterplot();">
         <option value='population'>Total population</option>
         <option value='income'>Income per person</option>
         <option value='life'>Life expectancy</option>
@@ -25,7 +25,7 @@
       &nbsp;
 
       &nbsp;Y attribute:&nbsp;
-      <select id='y-attribute' onchange="getfields()">
+      <select id='y-attribute' onchange="getfields(); plotaxes(); scatterplot();">
         <option value='population'>Total population</option>
         <option value='income'>Income per person</option>
         <option value='life'>Life expectancy</option>
@@ -35,14 +35,15 @@
       &nbsp;
 
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Region&nbsp;
-      <select id='region' onchange="getfields()">
+      <select id='region' onchange="getfields(); scatterplot();">
       </select>
 
       &nbsp;Year:&nbsp;
-      <input id='year-input' type='number' value='2000' min='1800' max='2100' onchange="getfields()">
+      <input id='year-input' type='number' value='2000' min='1800' max='2100' onchange="getfields(); scatterplot();">
 
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <input class="favorite playbutton" type="button" value="Play">
+      <!-- <input class="favorite playbutton" type="button" value="Play"> -->
+      <button id="play-button" class="btn btn-primary">Play</button>
 
       <br/>
       <svg id='scatter-plot'></svg>

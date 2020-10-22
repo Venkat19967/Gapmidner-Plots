@@ -15,18 +15,30 @@ var yrinput;
 var jsonVal;
 var jsonVal_max;
 var svg;
+var jsonVal_region;
 
 var currentx;
 var currenty;
+
+var x;
+var y;
+
+var colorScale;
+
+var interval = null;
+// var intervalDuration = 100;
+var playBtn;
 
 
 // This runs when the page is loaded
 document.addEventListener('DOMContentLoaded', function() {
     svg = d3.select('#scatter-plot');
-    
+    svg.append('g').attr('id', "plots")
   
     regionset = new Set();
     div = d3.select("body").append("div")
+
+    playBtn = d3.select('#play-button');
 
   
     // Load both files before doing anything else
@@ -55,94 +67,278 @@ document.addEventListener('DOMContentLoaded', function() {
         // let temp = Object.values(income[100]);
         console.log(jsonVal);
         console.log(jsonVal_max);
-      
+        
+        
 
         //set for unique regions
         regions.forEach(d => {
             regionset.add(d["World bank region"]);
         });
 
+        colorScale  = d3.scaleOrdinal().domain(Array.from(regionset)).range(Array.from(d3.schemeCategory10));
+
+        console.log(Array.from(regionset));
+        console.log(Array.from(d3.schemeCategory10));
+  
+
         let r = document.getElementById('region');
+        let temp = document.createElement("option");
+        temp.text = 'All'
+        r.add(temp);
         regionset.forEach(d => {
             let x = document.createElement("option");
             x.text = d;
             r.add(x);
         })
-  
-        // scatterplot();
-        getfields()
+
+        getfields();
+        plotaxes();
+        scatterplot();
     })
-  
+
+
+    playBtn.on('click', () => {
+        if (playBtn.text() === 'Play') {
+            console.log(playBtn.text())
+          playBtn.text('Pause')
+          interval = setInterval(function(){
+            yrval = document.getElementById("year-input").value;
+            console.log(yrval);
+            yrval = +yrval;
+
+            if(yrval == 2101){
+                console.log(playBtn.text())
+                playBtn.text('Play')
+                clearInterval(interval)
+                document.getElementById('year-input').value = 1800;
+                getfields();
+                scatterplot();
+            }
+            else{
+                document.getElementById('year-input').value = ++yrval;
+                console.log(yrval);
+                getfields();
+                scatterplot();
+            }
+            
+          }, 500)
+        } else {
+            console.log(playBtn.text())
+          playBtn.text('Play')
+          clearInterval(interval)
+        }
+    })
+
 });
 
-
-
 function getfields() {
-
     xattr = document.getElementById("x-attribute").value;
     yattr = document.getElementById("y-attribute").value;
     yrinput = document.getElementById("year-input").value;
     yrinput = +yrinput;
     reg = document.getElementById("region").value;
-    scatterplot();
-
-    
 }
 
 
 function plotaxes(){
+    d3.selectAll("#x-axis").remove();
+    d3.selectAll("#y-axis").remove();
+    d3.selectAll("#ytext").remove();
+    d3.selectAll("#xtext").remove();
 
-}
+    x = d3.scaleLinear().domain([0, eval("max_" + xattr)]).range([ 0, 1000 ]);
+    y = d3.scaleLinear().domain([0, eval("max_" + yattr)]).range([ 600, 0 ]);
 
-
-function scatterplot(){
-    
-    var x = d3.scaleLinear().domain([0, eval("max_" + xattr)]).range([ 0, 900 ]);
-    var y = d3.scaleLinear().domain([0, eval("max_" + yattr)]).range([ 600, 0 ]);
-    
-
-    
     svg.append("g")
-    .attr("transform", "translate("+ 75+ "," + 650 + ")")
+    .attr("transform", "translate("+ 125+ "," + 650 + ")")
     .attr('id', 'x-axis')
     .call(d3.axisBottom(x));
 
     svg.append("g")
     .attr('id', 'y-axis')
-    .attr("transform", "translate("+ 75+ "," + 50 + ")")
+    .attr("transform", "translate("+ 125+ "," + 50 + ")")
     .call(d3.axisLeft(y));
 
+    xtext = document.getElementById("x-attribute");
+    ytext = document.getElementById("y-attribute");
+
+    svg.append("text")
+    .attr('id','ytext')
+    .attr("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 35)
+    .attr("x", -350)
+    .attr("font-weight",500)
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "20px")
+    .text(ytext.options[ytext.selectedIndex].text)
     
+    svg.append("text")
+    .attr('id','xtext')
+    .attr("text-anchor", "middle")
+    .attr("x", 625)
+    .attr("y", 700)
+    .attr("font-weight",500)
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "20px")
+    .text(xtext.options[xtext.selectedIndex].text);
+}
+
+
+function scatterplot(){
+
+    if(reg == 'All'){
+        jsonVal_region = jsonVal;
+    } else {
+        jsonVal_region = jsonVal.filter(function (d) {
+            return (d.region == reg);
+        });
+    }
     
-    svg.selectAll("dot")
-    .data(jsonVal)
-    // .filter(function(d) { if(d.region == reg){return d;}})
-    .enter().append("circle")
-    .attr("fill", "white")
-    .attr("stroke","black")
-    .attr("fill-opacity","0")
-    .attr("r", 20)
-    .attr("transform", "translate("+ 75+ "," + 50 + ")")
-    .attr("cx", 
-    function(d) { 
-        if(eval("d."+ xattr + "[yrinput-1800]") == 'NaN'){
-            return x(0);
-        }
-        else{
-            // console.log(eval(`d.tsunami[yrinput-1800]`));
-            return x(parseInt(eval("d."+ xattr + "[yrinput-1800]")));
-        }
-    })
-    .attr("cy", function(d) { 
-        // if(d.population[yrinput-1800])
-        if(eval("d."+ yattr + "[yrinput-1800]") == 'NaN'){
-            return y(0);
-        }
-        else{
-            return y(parseInt(eval("d."+ yattr + "[yrinput-1800]")));
-        }
+
+    jsonVal_region = jsonVal_region.filter(function (d) {
+        return (d[xattr][yrinput-1800] != 'NaN' && d[yattr][yrinput-1800] != 'NaN');
     });
 
+    jsonVal_region.forEach(function(d){
+        d['yr'] = String(yrinput);
+    })
 
+    // console.log(jsonVal_region[7]['population'][1963-1800])
+    // console.log(jsonVal_region[7]['population'][1964-1800])
+
+    console.log(jsonVal_region);
+    const t = d3.transition().duration(500)
+    
+    svg.select('#plots').selectAll('g')
+    .data(jsonVal_region, d => {return String(d[xattr][yrinput-1800]) + String(d[yattr][yrinput-1800])+ String(yrinput) + String(reg)})
+    .join(
+    enter => enterplots(enter, t),
+    update => updateplots(update, t),
+    exit => exitplots(exit, t)
+    )
 
 }
+
+function enterplots(enter, t) {
+    enter.append('g').attr('id','plotpoints')
+      .call(
+          g => g.append('circle')
+          .transition(t)
+          .attr("fill", function(d){ return colorScale(String(d['region'])); } )
+          .attr("stroke","black")
+          .attr("fill-opacity","1")
+          .attr("r", 15)
+          .attr("transform", "translate("+ 125 + "," + 50 + ")")
+          .attr("cx", 
+          function(d) { 
+              if(eval(d[xattr][yrinput-1800]) == 'NaN'){
+                  return x(0);
+              }
+              else{
+                  return x(parseInt(eval(d[xattr][yrinput-1800])));
+              }
+          })
+          .attr("cy", function(d) { 
+              if(eval(d[yattr][yrinput-1800]) == 'NaN'){
+                  return y(0);
+              }
+              else{
+                  return y(parseInt(eval(d[yattr][yrinput-1800])));
+              }
+          })
+      )
+      .call(
+        g => g.append("text")
+        .transition(t)
+                    .attr("id", "circletext")
+                    .attr("transform", "translate("+ 125+ "," + 55 + ")")
+                    .attr("text-anchor", "middle")
+                    .attr("x",function(d) { 
+                        if(eval(d[xattr][yrinput-1800]) == 'NaN'){
+                            return x(0);
+                        }
+                        else{
+                            // console.log(eval(`d.tsunami[yrinput-1800]`));
+                            return x(parseInt(eval(d[xattr][yrinput-1800])));
+                        }
+                    } )
+                    .attr("y", function(d) { 
+                        // if(d.population[yrinput-1800])
+                        if(eval(d[yattr][yrinput-1800]) == 'NaN'){
+                            return y(0);
+                        }
+                        else{
+                            return y(parseInt(eval(d[yattr][yrinput-1800])));
+                        }
+                    })
+                    .text(function(d){
+                        return d.code;
+                    })
+                    .attr("font-family", "sans-serif")
+                    .attr("font-size", "13px")
+                    .attr("fill", "white")
+      )
+  }
+  
+  function updateplots(update, t) {
+    update
+    .call(g => g.select('circle')
+    .transition(t)
+    .attr("r", 15)
+    .attr("fill", function(d){ return colorScale(String(d['region'])); })
+    // .attr("transform", "translate("+ 125 + "," + 50 + ")")
+      .attr("cx", 
+      function(d) { 
+          if(eval(d[xattr][yrinput-1800]) == 'NaN'){
+              return x(0);
+          }
+          else{
+              return x(parseInt(eval(d[xattr][yrinput-1800])));
+          }
+      })
+      .attr("cy", function(d) { 
+          if(eval(d[yattr][yrinput-1800]) == 'NaN'){
+              return y(0);
+          }
+          else{
+              return y(parseInt(eval(d[yattr][yrinput-1800])));
+          }
+      })
+      )
+    .call(
+        g => g.select('text')
+        .transition(t)
+        .attr("transform", "translate("+ 125+ "," + 55 + ")")
+        .attr("text-anchor", "middle")
+        .attr("x",function(d) { 
+                        if(eval(d[xattr][yrinput-1800]) == 'NaN'){
+                            return x(0);
+                        }
+                        else{
+                            return x(parseInt(eval(d[xattr][yrinput-1800])));
+                        }
+                    } )
+                    .attr("y", function(d) { 
+                        if(eval(d[yattr][yrinput-1800]) == 'NaN'){
+                            return y(0);
+                        }
+                        else{
+                            return y(parseInt(eval(d[yattr][yrinput-1800])));
+                        }
+                    })
+                    .text(function(d){
+                        return d.code;
+                    })
+    )
+  }
+  
+  function exitplots(exit, t) {
+    exit
+    .call(
+        g =>
+        g.transition(t)
+        .style('opacity', 0)
+        .remove()
+    )
+  }
