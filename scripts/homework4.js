@@ -36,7 +36,11 @@ document.addEventListener('DOMContentLoaded', function() {
     svg.append('g').attr('id', "plots")
   
     regionset = new Set();
+
     div = d3.select("body").append("div")
+    .attr("class", "tooltip-map")
+    .style("opacity", 0);
+
 
     playBtn = d3.select('#play-button');
 
@@ -99,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     playBtn.on('click', () => {
         if (playBtn.text() === 'Play') {
-            console.log(playBtn.text())
+            // console.log(playBtn.text())
           playBtn.text('Pause')
           interval = setInterval(function(){
             yrval = document.getElementById("year-input").value;
@@ -120,7 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 getfields();
                 scatterplot();
             }
-            
           }, 500)
         } else {
             console.log(playBtn.text())
@@ -182,10 +185,13 @@ function plotaxes(){
     .attr("font-family", "sans-serif")
     .attr("font-size", "20px")
     .text(xtext.options[xtext.selectedIndex].text);
+
 }
 
 
 function scatterplot(){
+
+    d3.selectAll("#yrimage").remove();
 
     if(reg == 'All'){
         jsonVal_region = jsonVal;
@@ -200,18 +206,26 @@ function scatterplot(){
         return (d[xattr][yrinput-1800] != 'NaN' && d[yattr][yrinput-1800] != 'NaN');
     });
 
-    jsonVal_region.forEach(function(d){
-        d['yr'] = String(yrinput);
-    })
+    // jsonVal_region.forEach(function(d){
+    //     d['yr'] = String(yrinput);
+    // })
 
-    // console.log(jsonVal_region[7]['population'][1963-1800])
-    // console.log(jsonVal_region[7]['population'][1964-1800])
+    svg.append("text")
+    .attr('id','yrimage')
+    .attr("text-anchor", "middle")
+    .attr("x", 641)
+    .attr("y", 361)
+    .attr("font-weight",500)
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "150px")
+    .attr("fill-opacity","0.4")
+    .text(yrinput);
 
     console.log(jsonVal_region);
     const t = d3.transition().duration(500)
     
     svg.select('#plots').selectAll('g')
-    .data(jsonVal_region, d => {return String(d[xattr][yrinput-1800]) + String(d[yattr][yrinput-1800])+ String(yrinput) + String(reg)})
+    .data(jsonVal_region)
     .join(
     enter => enterplots(enter, t),
     update => updateplots(update, t),
@@ -221,9 +235,35 @@ function scatterplot(){
 }
 
 function enterplots(enter, t) {
+    console.log(enter)
     enter.append('g').attr('id','plotpoints')
       .call(
-          g => g.append('circle')
+          g => g
+          .on('mouseover', function(d,i) {
+            // d3.select(this).transition()
+            //   .attr('class', 'countrymap_hover');
+            div.transition()
+              .duration(50)
+              .style("opacity", 1);
+            div.html(`Country: ${d.country}`)
+            .style("left", (d3.event.pageX) + 10 + "px")
+            .style("top", (d3.event.pageY) + 10 + "px");
+          })
+          .on('mousemove',function(d,i) {
+            // console.log('mousemove on ' + d.properties.name);
+            div.html(`Country: ${d.country}`)
+            .style("left", (d3.event.pageX) + 10 + "px")
+            .style("top", (d3.event.pageY) + 10 + "px");
+          })
+          .on('mouseout', function(d,i) {
+            // console.log('mouseout on ' + d.properties.name);
+            d3.select(this).transition()
+                     .attr('class', 'countrymap');
+            div.transition()
+                     .duration(50)
+                     .style("opacity", 0);
+          })
+          .append('circle')
           .transition(t)
           .attr("fill", function(d){ return colorScale(String(d['region'])); } )
           .attr("stroke","black")
@@ -282,6 +322,7 @@ function enterplots(enter, t) {
   }
   
   function updateplots(update, t) {
+      console.log(update)
     update
     .call(g => g.select('circle')
     .transition(t)
