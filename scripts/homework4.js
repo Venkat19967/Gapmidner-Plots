@@ -81,8 +81,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         colorScale  = d3.scaleOrdinal().domain(Array.from(regionset)).range(Array.from(d3.schemeCategory10));
 
-        console.log(Array.from(regionset));
-        console.log(Array.from(d3.schemeCategory10));
+        // console.log(Array.from(regionset));
+        // console.log(Array.from(d3.schemeCategory10));
   
 
         let r = document.getElementById('region');
@@ -110,11 +110,11 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(yrval);
             yrval = +yrval;
 
-            if(yrval == 2101){
+            if(yrval == 2021){
                 console.log(playBtn.text())
                 playBtn.text('Play')
                 clearInterval(interval)
-                document.getElementById('year-input').value = 1800;
+                document.getElementById('year-input').value = 2000;
                 getfields();
                 scatterplot();
             }
@@ -126,7 +126,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
           }, 500)
         } else {
-            console.log(playBtn.text())
           playBtn.text('Play')
           clearInterval(interval)
         }
@@ -235,7 +234,7 @@ function scatterplot(){
 }
 
 function enterplots(enter, t) {
-    console.log(enter)
+    // console.log(enter)
     enter.append('g').attr('id','plotpoints')
       .call(
           g => g
@@ -257,8 +256,8 @@ function enterplots(enter, t) {
           })
           .on('mouseout', function(d,i) {
             // console.log('mouseout on ' + d.properties.name);
-            d3.select(this).transition()
-                     .attr('class', 'countrymap');
+            // d3.select(this).transition()
+            //          .attr('class', 'countrymap');
             div.transition()
                      .duration(50)
                      .style("opacity", 0);
