@@ -1,3 +1,6 @@
+# Firebase URL:
+[Gapminder Plots](https://gapminder-plots.firebaseapp.com/)
+
 # Fancy GapMinder
 
 In this homework, you'll apply knowledge of animations and joins to create a scatterplot that animates as attribute and years for the dataset are updated, which is popularly known as the GapMinder scatterplot. **This assignment is worth 10 points.** It will include the following aspects:
